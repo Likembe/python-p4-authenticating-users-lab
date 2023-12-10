@@ -11,7 +11,7 @@ class TestApp:
     def test_logs_user_in(self):
         '''logs user in by username and adds user_id to session at /login.'''
         with app.test_client() as client:
-            
+
             client.get('/clear')
 
             user = User.query.first()
@@ -22,7 +22,7 @@ class TestApp:
 
             assert(response.content_type == 'application/json')
             assert(response.status_code == 200)
-            assert(response_json['id'] == user.id)
+            assert(response_json['user_id'] == user.id)
             assert(response_json['username'] == user.username)
             assert(flask.session.get('user_id') == user.id)
 
@@ -58,7 +58,7 @@ class TestApp:
 
             assert(logged_in_response.content_type == 'application/json')
             assert(logged_in_response.status_code == 200)
-            assert(logged_in_json['id'])
+            assert(logged_in_json['user_id'])
             assert(logged_in_json['username'])
 
             client.delete('/logout')
@@ -67,4 +67,4 @@ class TestApp:
             logged_out_json = logged_out_response.get_json()
 
             assert(logged_out_response.status_code == 401)
-            assert(logged_out_json == {})
+            assert(logged_out_json == {'error': 'No active session'})

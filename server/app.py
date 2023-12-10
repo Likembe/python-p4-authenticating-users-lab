@@ -52,6 +52,33 @@ api.add_resource(ClearSession, '/clear')
 api.add_resource(IndexArticle, '/articles')
 api.add_resource(ShowArticle, '/articles/<int:id>')
 
+@app.route('/login', methods=['POST'])
+def login():
+    if not request.json or 'username' not in request.json:
+        return jsonify({'error': 'Username not provided'}), 400
+    
+    username = request.json['username']
+    user = User.query.filter_by(username=username).first()
+
+    if not user:
+        return jsonify({'error': 'User not found'}), 404
+
+    session['user_id'] = user.id
+    return jsonify({'message': 'Login successful', 'user_id': user.id, 'username': user.username}), 200
+
+@app.route('/logout', methods=['DELETE'])
+def logout():
+    session.pop('user_id', None)
+    return '', 204
+
+@app.route('/check_session', methods=['GET'])
+def check_session():
+    if 'user_id' in session:
+        user = User.query.get(session['user_id'])
+        return jsonify({'user_id': user.id, 'username': user.username}), 200
+    else:
+        return jsonify({'error': 'No active session'}), 401
+
 
 if __name__ == '__main__':
     app.run(port=5555, debug=True)
